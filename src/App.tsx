@@ -9,6 +9,7 @@ import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
 import UserList from "@/pages/UserList";
 import NotFound from "@/pages/NotFound";
+import SchemeList from "@/pages/SchemeList";
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,16 @@ const App = () => (
               <ProtectedRoute>
                 <AdminLayout>
                   <UserList />
+                </AdminLayout>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/schemes"
+            element={
+              <ProtectedRoute>
+                <AdminLayout>
+                  <SchemeList />
                 </AdminLayout>
               </ProtectedRoute>
             }
