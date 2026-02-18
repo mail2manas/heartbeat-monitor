@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import {
   LayoutDashboard,
   Users,
+  QrCode,
   LogOut,
   Menu,
   ChevronLeft,
@@ -23,6 +24,7 @@ import { useState } from "react";
 const navItems = [
   { title: "Dashboard", path: "/", icon: LayoutDashboard },
   { title: "Users", path: "/users", icon: Users },
+  { title: "Schemes", path: "/schemes", icon: QrCode },
 ];
 
 interface AdminLayoutProps {
