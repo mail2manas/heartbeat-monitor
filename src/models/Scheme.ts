@@ -6,7 +6,7 @@ export interface SKU {
 
 export interface PackSize {
   id: string;
-  label: string;       // e.g. "500ml", "1L", "250g"
+  label: string;
   skuId: string;
 }
 
@@ -16,21 +16,45 @@ export interface StateConfig {
   stateCode: string;
   stateName: string;
   valueType: CouponValueType;
-  value: number;         // ₹ amount or points count
+  value: number;
   noOfCoupons: number;
 }
 
-export interface SchemeDefinition {
-  id: string;
-  name: string;
+/** Each SKU+Pack combination in the scheme */
+export interface SKUPackEntry {
   skuId: string;
   skuName: string;
   packSizeId: string;
   packSizeLabel: string;
-  /** States where value is fixed (same for all) */
-  fixedStates: StateConfig[];
-  /** Other states where values can differ */
-  customStates: StateConfig[];
+  couponCount: number;
+  couponValue: number;
+  expiryDate: string;          // ISO date
+  couponTypeId: string;
+  couponTypeName: string;
+  /** Custom overrides per region for this SKU+Pack */
+  regionOverrides: RegionOverride[];
+}
+
+export interface RegionOverride {
+  stateCodes: string[];
+  stateNames: string[];
+  valueType: CouponValueType;
+  value: number;
+  couponCount: number;
+}
+
+export interface SchemeDefinition {
+  id: string;
+  schemeCode: string;           // auto-generated
+  name: string;
+  description: string;
+  valueType: CouponValueType;
+  startDate: string;
+  endDate: string;
+  /** Fixed-value state codes */
+  fixedStateCodes: string[];
+  fixedStateNames: string[];
+  skuPackEntries: SKUPackEntry[];
   status: "draft" | "active" | "expired";
   createdAt: string;
   updatedAt: string;
@@ -38,11 +62,11 @@ export interface SchemeDefinition {
 
 export interface SchemeFormData {
   name: string;
-  skuId: string;
-  packSizeId: string;
-  fixedStatesCodes: string[];
-  fixedValueType: CouponValueType;
-  fixedValue: number;
-  fixedNoOfCoupons: number;
-  customStates: StateConfig[];
+  description: string;
+  valueType: CouponValueType;
+  startDate: string;
+  endDate: string;
+  fixedStateCodes: string[];
+  /** Selected SKU+Pack combos with their details */
+  skuPackEntries: SKUPackEntry[];
 }

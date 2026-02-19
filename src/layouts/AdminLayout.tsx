@@ -3,6 +3,8 @@ import {
   LayoutDashboard,
   Users,
   QrCode,
+  Ticket,
+  Gift,
   LogOut,
   Menu,
   ChevronLeft,
@@ -25,6 +27,8 @@ const navItems = [
   { title: "Dashboard", path: "/", icon: LayoutDashboard },
   { title: "Users", path: "/users", icon: Users },
   { title: "Schemes", path: "/schemes", icon: QrCode },
+  { title: "Coupon Types", path: "/coupon-types", icon: Ticket },
+  { title: "FOC Products", path: "/foc-products", icon: Gift },
 ];
 
 interface AdminLayoutProps {
