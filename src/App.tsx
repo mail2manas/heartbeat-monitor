@@ -10,6 +10,8 @@ import Dashboard from "@/pages/Dashboard";
 import UserList from "@/pages/UserList";
 import NotFound from "@/pages/NotFound";
 import SchemeList from "@/pages/SchemeList";
+import CouponTypeList from "@/pages/CouponTypeList";
+import FOCProductList from "@/pages/FOCProductList";
 
 const queryClient = new QueryClient();
 
@@ -21,36 +23,11 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Login />} />
-          <Route
-            path="/"
-            element={
-              <ProtectedRoute>
-                <AdminLayout>
-                  <Dashboard />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/users"
-            element={
-              <ProtectedRoute>
-                <AdminLayout>
-                  <UserList />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/schemes"
-            element={
-              <ProtectedRoute>
-                <AdminLayout>
-                  <SchemeList />
-                </AdminLayout>
-              </ProtectedRoute>
-            }
-          />
+          <Route path="/" element={<ProtectedRoute><AdminLayout><Dashboard /></AdminLayout></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute><AdminLayout><UserList /></AdminLayout></ProtectedRoute>} />
+          <Route path="/schemes" element={<ProtectedRoute><AdminLayout><SchemeList /></AdminLayout></ProtectedRoute>} />
+          <Route path="/coupon-types" element={<ProtectedRoute><AdminLayout><CouponTypeList /></AdminLayout></ProtectedRoute>} />
+          <Route path="/foc-products" element={<ProtectedRoute><AdminLayout><FOCProductList /></AdminLayout></ProtectedRoute>} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

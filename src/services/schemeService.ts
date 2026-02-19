@@ -1,4 +1,6 @@
-import type { SchemeDefinition, SchemeFormData, SKU, PackSize } from "@/models/Scheme";
+import type { SchemeDefinition, SchemeFormData, SKU, PackSize, SKUPackEntry } from "@/models/Scheme";
+import type { CouponType } from "@/models/CouponType";
+import type { FOCProduct } from "@/models/FOCProduct";
 
 const INDIAN_STATES = [
   { code: "AP", name: "Andhra Pradesh" }, { code: "AR", name: "Arunachal Pradesh" },
@@ -42,60 +44,93 @@ const MOCK_PACK_SIZES: PackSize[] = [
   { id: "ps-13", label: "750ml", skuId: "sku-5" },
 ];
 
+// FOC SKUs (for points-based schemes)
+const FOC_SKUS: SKU[] = [
+  { id: "foc-sku-1", name: "Coca Cola Zero 200ml", code: "CCZ200" },
+  { id: "foc-sku-2", name: "Lays Classic 25g", code: "LAY025" },
+  { id: "foc-sku-3", name: "Sprite Can 150ml", code: "SPR150" },
+];
+
+const FOC_PACK_SIZES: PackSize[] = [
+  { id: "foc-ps-1", label: "200ml", skuId: "foc-sku-1" },
+  { id: "foc-ps-2", label: "25g", skuId: "foc-sku-2" },
+  { id: "foc-ps-3", label: "150ml", skuId: "foc-sku-3" },
+];
+
 let mockSchemes: SchemeDefinition[] = [
   {
     id: "scheme-1",
+    schemeCode: "SCH-20251201-001",
     name: "Summer Promo - Coca Cola 500ml",
-    skuId: "sku-1", skuName: "Coca Cola",
-    packSizeId: "ps-2", packSizeLabel: "500ml",
-    fixedStates: [
-      { stateCode: "MH", stateName: "Maharashtra", valueType: "rupees", value: 10, noOfCoupons: 5000 },
-      { stateCode: "GJ", stateName: "Gujarat", valueType: "rupees", value: 10, noOfCoupons: 3000 },
-    ],
-    customStates: [
-      { stateCode: "KA", stateName: "Karnataka", valueType: "points", value: 50, noOfCoupons: 2000 },
-      { stateCode: "TN", stateName: "Tamil Nadu", valueType: "rupees", value: 15, noOfCoupons: 4000 },
+    description: "Summer promotional scheme for Coca Cola products",
+    valueType: "rupees",
+    startDate: "2025-12-01",
+    endDate: "2026-03-31",
+    fixedStateCodes: ["MH", "GJ"],
+    fixedStateNames: ["Maharashtra", "Gujarat"],
+    skuPackEntries: [
+      {
+        skuId: "sku-1", skuName: "Coca Cola", packSizeId: "ps-2", packSizeLabel: "500ml",
+        couponCount: 5000, couponValue: 10, expiryDate: "2026-03-31",
+        couponTypeId: "ct-1", couponTypeName: "Round", regionOverrides: [],
+      },
     ],
     status: "active", createdAt: "2025-12-01T10:00:00Z", updatedAt: "2025-12-15T10:00:00Z",
   },
 ];
 
+let schemeCounter = 1;
+
 const delay = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export const schemeService = {
   getStates: async () => { await delay(200); return INDIAN_STATES; },
-  getSKUs: async () => { await delay(200); return MOCK_SKUS; },
-  getPackSizes: async (skuId: string) => { await delay(200); return MOCK_PACK_SIZES.filter((p) => p.skuId === skuId); },
-
-  getSchemes: async () => {
-    await delay(400);
-    return [...mockSchemes];
+  getSKUs: async (valueType: "rupees" | "points" = "rupees") => {
+    await delay(200);
+    return valueType === "points" ? FOC_SKUS : MOCK_SKUS;
   },
+  getPackSizes: async (skuId: string) => {
+    await delay(200);
+    const allPacks = [...MOCK_PACK_SIZES, ...FOC_PACK_SIZES];
+    return allPacks.filter((p) => p.skuId === skuId);
+  },
+  getCouponTypes: async (): Promise<CouponType[]> => {
+    await delay(200);
+    return [
+      { id: "ct-1", name: "Round", description: "Circular", createdAt: "", updatedAt: "" },
+      { id: "ct-2", name: "Card", description: "Card", createdAt: "", updatedAt: "" },
+      { id: "ct-3", name: "Rectangular", description: "Rectangular", createdAt: "", updatedAt: "" },
+    ];
+  },
+
+  generateSchemeCode: () => {
+    schemeCounter++;
+    const date = new Date().toISOString().slice(0, 10).replace(/-/g, "");
+    return `SCH-${date}-${String(schemeCounter).padStart(3, "0")}`;
+  },
+
+  getSchemes: async () => { await delay(400); return [...mockSchemes]; },
 
   createScheme: async (form: SchemeFormData) => {
     await delay(500);
-    const sku = MOCK_SKUS.find((s) => s.id === form.skuId)!;
-    const pack = MOCK_PACK_SIZES.find((p) => p.id === form.packSizeId)!;
     const now = new Date().toISOString();
-
+    const stateNames = form.fixedStateCodes.map((c) => INDIAN_STATES.find((s) => s.code === c)?.name || c);
     const scheme: SchemeDefinition = {
       id: `scheme-${Date.now()}`,
+      schemeCode: schemeService.generateSchemeCode(),
       name: form.name,
-      skuId: form.skuId, skuName: sku.name,
-      packSizeId: form.packSizeId, packSizeLabel: pack.label,
-      fixedStates: form.fixedStatesCodes.map((code) => {
-        const st = INDIAN_STATES.find((s) => s.code === code)!;
-        return { stateCode: code, stateName: st.name, valueType: form.fixedValueType, value: form.fixedValue, noOfCoupons: form.fixedNoOfCoupons };
-      }),
-      customStates: form.customStates,
+      description: form.description,
+      valueType: form.valueType,
+      startDate: form.startDate,
+      endDate: form.endDate,
+      fixedStateCodes: form.fixedStateCodes,
+      fixedStateNames: stateNames,
+      skuPackEntries: form.skuPackEntries,
       status: "draft", createdAt: now, updatedAt: now,
     };
     mockSchemes.push(scheme);
     return scheme;
   },
 
-  deleteScheme: async (id: string) => {
-    await delay(300);
-    mockSchemes = mockSchemes.filter((s) => s.id !== id);
-  },
+  deleteScheme: async (id: string) => { await delay(300); mockSchemes = mockSchemes.filter((s) => s.id !== id); },
 };
